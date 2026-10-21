@@ -31,6 +31,8 @@ h1 { font-family: var(--titulo); font-weight: 400; font-size: clamp(36px, 5.2vw,
 h1 em { font-style: normal; color: var(--acento); }
 [hidden] { display: none !important; }
 .cuerpo { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+/* en dos columnas, el resultado arranca y termina a la altura del recuadro de texto */
+@media (min-width: 861px) { .resultado { margin-top: calc(1.5em + 10px); min-height: max(390px, 46vh); align-content: start; } }
 @media (max-width: 860px) { .cuerpo { grid-template-columns: minmax(0, 1fr); } }
 
 /* entrada */
@@ -38,7 +40,7 @@ h1 em { font-style: normal; color: var(--acento); }
 .rotulo { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .rotulo label { font-weight: 700; }
 .contador { color: var(--gris); font-size: 14px; font-variant-numeric: tabular-nums; }
-textarea { width: 100%; min-height: 340px; height: 46vh; resize: vertical; padding: 16px 18px; font: inherit; font-size: 16px; line-height: 1.55;
+textarea { width: 100%; min-height: 390px; height: 46vh; resize: vertical; padding: 16px 18px; font: inherit; font-size: 16px; line-height: 1.55;
   color: var(--tinta); background: var(--papel); border: 1.5px solid var(--barra); border-radius: 10px; }
 textarea:focus { outline: none; border-color: var(--acento); box-shadow: 0 0 0 3px rgba(196, 87, 46, .18); }
 textarea::placeholder { color: var(--gris); }
@@ -54,6 +56,7 @@ button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
 /* resultado */
 .resultado { background: var(--arena); border-radius: 14px; padding: 24px 26px; display: grid; gap: 20px; min-width: 0; }
 .estado { font-size: 14px; color: var(--gris); min-height: 1.5em; }
+.estado:empty { display: none; }
 .estado.error { color: #9C2A10; font-weight: 700; }
 .veredicto { display: grid; gap: 2px; }
 .veredicto .chico { color: var(--gris); font-size: 15px; }
@@ -86,7 +89,7 @@ button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
 <body>
 <div class="marco">
   <header>
-    <div class="ceja">Grupo 7 · Laboratorio de Datos · FCEyN, UBA</div>
+    <div class="ceja">Grupo 7: Allo, Arroyo, Mastantuono · Laboratorio de Datos · FCEyN, UBA</div>
     <h1>¿Qué <em>IA</em> escribió esto?</h1>
   </header>
 
@@ -318,11 +321,11 @@ button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
     const palabras = Math.round(Math.expm1(r.rasgos.log_palabras));
     const notas = [];
     if (palabras < 50) notas.push('Texto corto: con menos de 50 palabras el modelo se equivoca más seguido. Cuanto más largo el texto, más le acierta.');
-    else if (p >= .9) notas.push('Cuando el modelo está así de seguro, en la prueba final acertó más del 99 % de las veces.');
+    else if (p >= .9) { /* seguro: sin nota */ }
     else if (p >= .6) notas.push('Confianza media: es una buena pista, no una certeza.');
     else notas.push('El modelo duda entre dos o más: tomalo como un empate.');
     $('nota').textContent = notas.join(' ');
-    $('nota').hidden = false;
+    $('nota').hidden = !notas.length;
 
     [['Estilo', r.estilo], ['Palabras', r.palabras]].forEach(([n, q]) => {
       const fila = $('voto-' + n), mejor = EMPRESAS.reduce((a, b) => q[b.clase] > q[a.clase] ? b : a);
