@@ -24,7 +24,7 @@
 html, body { background: var(--fondo); color: var(--tinta); }
 body { font-family: var(--texto); font-size: 17px; line-height: 1.5; margin: 0;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-.marco { max-width: 1240px; margin: 0 auto; padding-block: 28px 20px; display: grid; gap: 22px; }
+.marco { max-width: 1240px; margin: 0 auto; padding-block: 28px; display: grid; gap: 22px; }
 header { display: grid; gap: 4px; }
 .ceja { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--gris); font-weight: 700; }
 h1 { font-family: var(--titulo); font-weight: 400; font-size: clamp(36px, 5.2vw, 60px); line-height: 1.05; margin: 0; text-wrap: balance; }
@@ -78,7 +78,8 @@ button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
 .huellas { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
 .huellas li { background: var(--fondo); border-radius: 999px; padding: 3px 11px; font-size: 13.5px; }
 .huellas li b { font-variant-numeric: tabular-nums; }
-@media (prefers-reduced-motion: reduce) { .pista span, .apilada span { transition: none; } }
+.marco.suave { transition: padding-top .45s cubic-bezier(.2, .8, .2, 1); }
+@media (prefers-reduced-motion: reduce) { .pista span, .apilada span, .marco.suave { transition: none; } }
 </style>
 
 </head>
@@ -288,6 +289,7 @@ button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
     $('detalle').hidden = true;
     estado.textContent = predecir ? '' : estado.textContent;
     estado.classList.remove('error');
+    encuadrar();
   }
 
   function correr() {
@@ -353,6 +355,7 @@ button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
     });
     $('detalle').hidden = false;
     estado.textContent = '';
+    encuadrar();
   }
 
   // cargar el modelo (viene adentro de la página: no hace falta internet)
@@ -373,6 +376,15 @@ button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
       boton.textContent = 'Modelo no disponible';
     }
   }
+  // centra la página en la pantalla; cuando aparece el detalle, sube suave lo justo para que entre
+  function encuadrar() {
+    const m = document.querySelector('.marco');
+    const alto = m.offsetHeight - parseFloat(getComputedStyle(m).paddingTop) + 28;
+    m.style.paddingTop = 28 + Math.max(0, (innerHeight - alto) / 2) + 'px';
+  }
+  encuadrar();
+  document.fonts.ready.then(() => { encuadrar(); requestAnimationFrame(() => document.querySelector('.marco').classList.add('suave')); });
+  addEventListener('resize', encuadrar);
   setTimeout(cargar, 30);   // primero se dibuja la página
 })();
 </script>
