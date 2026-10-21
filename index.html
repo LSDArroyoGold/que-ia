@@ -29,7 +29,7 @@ header { display: grid; gap: 4px; }
 .ceja { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--gris); font-weight: 700; }
 h1 { font-family: var(--titulo); font-weight: 400; font-size: clamp(36px, 5.2vw, 60px); line-height: 1.05; margin: 0; text-wrap: balance; }
 h1 em { font-style: normal; color: var(--acento); }
-.bajada { margin: 4px 0 0; color: var(--gris); max-width: 62ch; }
+[hidden] { display: none !important; }
 .cuerpo { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 28px; align-items: start; }
 @media (max-width: 860px) { .cuerpo { grid-template-columns: minmax(0, 1fr); } }
 
@@ -50,10 +50,6 @@ button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
 .detectar:disabled { background: var(--barra); cursor: progress; }
 .secundario { background: transparent; color: var(--tinta); border: 1.5px solid var(--barra); padding: 10px 16px; }
 .secundario:hover { border-color: var(--tinta); }
-.atajo { color: var(--gris); font-size: 13px; }
-.ejemplos { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; color: var(--gris); font-size: 14px; }
-.ejemplos button { background: var(--arena); border: 0; padding: 6px 12px; font-size: 14px; color: var(--tinta); }
-.ejemplos button:hover { background: var(--barra); }
 
 /* resultado */
 .resultado { background: var(--arena); border-radius: 14px; padding: 24px 26px; display: grid; gap: 20px; min-width: 0; }
@@ -82,8 +78,6 @@ button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
 .huellas { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
 .huellas li { background: var(--fondo); border-radius: 999px; padding: 3px 11px; font-size: 13.5px; }
 .huellas li b { font-variant-numeric: tabular-nums; }
-footer { color: var(--gris); font-size: 13px; display: flex; justify-content: space-between; gap: 6px 24px; flex-wrap: wrap;
-  border-top: 1px solid var(--barra); padding-top: 12px; }
 @media (prefers-reduced-motion: reduce) { .pista span, .apilada span { transition: none; } }
 </style>
 
@@ -93,7 +87,6 @@ footer { color: var(--gris); font-size: 13px; display: flex; justify-content: sp
   <header>
     <div class="ceja">Grupo 7 · Laboratorio de Datos · FCEyN, UBA</div>
     <h1>¿Qué <em>IA</em> escribió esto?</h1>
-    <p class="bajada">Pegá una respuesta de Claude, ChatGPT o Gemini y el modelo te dice cuál de las tres la escribió, con qué probabilidad.</p>
   </header>
 
   <div class="cuerpo">
@@ -106,9 +99,7 @@ footer { color: var(--gris); font-size: 13px; display: flex; justify-content: sp
       <div class="acciones">
         <button class="detectar" id="detectar" disabled>Cargando el modelo…</button>
         <button class="secundario" id="borrar" type="button">Borrar</button>
-        <span class="atajo">o Ctrl + Enter</span>
       </div>
-      <div class="ejemplos" id="ejemplos"><span>Ejemplos de la presentación:</span></div>
     </section>
 
     <section class="resultado" aria-live="polite" aria-label="Resultado">
@@ -129,10 +120,6 @@ footer { color: var(--gris); font-size: 13px; display: flex; justify-content: sp
     </section>
   </div>
 
-  <footer>
-    <span>Corre entero en el navegador: el texto no sale de esta página y funciona sin internet.</span>
-    <span>Regresión logística sobre 23 rasgos de estilo y sobre las palabras · entrenado con 3453 respuestas de 7 modelos.</span>
-  </footer>
 </div>
 
 <script>// Port a JavaScript del detector v2 (final.py + rasgos.py): mismo resultado que predict_proba en Python.
@@ -260,10 +247,9 @@ footer { color: var(--gris); font-size: 13px; display: flex; justify-content: sp
     { clase: 'google', nombre: 'Gemini', de: 'Google', color: 'var(--gemini)' },
     { clase: 'openai', nombre: 'ChatGPT', de: 'OpenAI', color: 'var(--chatgpt)' },
   ];
-  const EJEMPLOS = ["La distancia media entre la Tierra y la Luna es de unos **384 400 km** (aproximadamente 238 900 millas). Como la órbita de la Luna es elíptica, esta distancia varía: en el **perigeo** (punto más cercano) ronda los 363 000 km, y en el **apogeo** (punto más lejano) alcanza unos 405 000 km.", "La distancia media entre la Tierra y la Luna es de aproximadamente **384.400 km**. Como la órbita lunar es elíptica, varía: oscila entre unos **363.300 km** y **405.500 km**.", "La distancia promedio entre la Tierra y la Luna es de aproximadamente **384.400 kilómetros**.\n\nSin embargo, como la órbita de la Luna no es un círculo perfecto sino una elipse, esta distancia varía constantemente:\n\n*   **Punto más cercano (Perigeo):** unos **363.300 km**.\n*   **Punto más lejano (Apogeo):** unos **405.500 km**.\n\nPara ponerlo en perspectiva, a esa distancia promedio cabrían aproximadamente 30 planetas del tamaño de la Tierra puestos uno al lado del otro."];
   const $ = id => document.getElementById(id);
   const texto = $('texto'), boton = $('detectar'), estado = $('estado');
-  let predecir = null, esEjemplo = false;
+  let predecir = null;
 
   const pct = p => p >= .995 ? 'más de 99 %' : p < .005 ? 'menos de 1 %' : Math.round(100 * p) + ' %';
   const pctCorto = p => p >= .995 ? '>99 %' : p < .005 ? '<1 %' : Math.round(100 * p) + ' %';
@@ -278,23 +264,14 @@ footer { color: var(--gris); font-size: 13px; display: flex; justify-content: sp
     `<div class="voto" id="voto-${n}"><span>${n}</span><span class="apilada">` +
     EMPRESAS.map(e => `<span style="background:${e.color};width:0"></span>`).join('') + `</span><span class="que"></span></div>`).join('');
 
-  EJEMPLOS.forEach((t, i) => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.textContent = 'Texto ' + 'ABC'[i];
-    b.addEventListener('click', () => { texto.value = t; esEjemplo = true; contar(); correr('Texto ' + 'ABC'[i]); });
-    $('ejemplos').appendChild(b);
-  });
-
   function contar() {
     const n = contarPalabras(texto.value);
     $('contador').textContent = n === 1 ? '1 palabra' : n + ' palabras';
   }
-  texto.addEventListener('input', () => { esEjemplo = false; contar(); });
-  texto.addEventListener('focus', () => { if (esEjemplo) texto.select(); });   // pegar encima del ejemplo lo reemplaza
+  texto.addEventListener('input', contar);
   texto.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); correr(); } });
   boton.addEventListener('click', () => correr());
-  $('borrar').addEventListener('click', () => { texto.value = ''; esEjemplo = false; contar(); limpiarResultado(); texto.focus(); });
+  $('borrar').addEventListener('click', () => { texto.value = ''; contar(); limpiarResultado(); texto.focus(); });
 
   function limpiarResultado() {
     $('v-chico').textContent = 'Todavía no hay texto';
@@ -309,11 +286,11 @@ footer { color: var(--gris); font-size: 13px; display: flex; justify-content: sp
     });
     $('nota').hidden = true;
     $('detalle').hidden = true;
-    estado.textContent = predecir ? 'Listo. Pegá un texto y tocá Detectar IA.' : estado.textContent;
+    estado.textContent = predecir ? '' : estado.textContent;
     estado.classList.remove('error');
   }
 
-  function correr(origen) {
+  function correr() {
     if (!predecir) return;
     const t = texto.value;
     if (!t.trim()) { limpiarResultado(); estado.textContent = 'Primero pegá un texto en el recuadro.'; estado.classList.add('error'); texto.focus(); return; }
@@ -324,7 +301,7 @@ footer { color: var(--gris); font-size: 13px; display: flex; justify-content: sp
     estado.classList.remove('error');
     const orden = EMPRESAS.slice().sort((a, b) => r.proba[b.clase] - r.proba[a.clase]);
     const g = orden[0], p = r.proba[g.clase];
-    $('v-chico').textContent = origen ? origen + ' · lo escribió' : 'Lo escribió';
+    $('v-chico').textContent = 'Lo escribió';
     $('v-quien').textContent = g.nombre;
     $('v-quien').style.color = g.color;
     $('v-conf').textContent = 'con ' + pct(p) + ' de probabilidad';
@@ -389,8 +366,7 @@ footer { color: var(--gris); font-size: 13px; display: flex; justify-content: sp
       predecir = Detector.crearDetector(JSON.parse($('modelo').textContent), buffer);
       boton.disabled = false;
       boton.textContent = 'Detectar IA';
-      if (EJEMPLOS.length) { texto.value = EJEMPLOS[0]; esEjemplo = true; contar(); correr('Texto A (ejemplo)'); estado.textContent = 'Listo. Pegá tu texto encima del ejemplo y tocá Detectar IA.'; }
-      else limpiarResultado();
+      limpiarResultado();
     } catch (err) {
       estado.textContent = 'No se pudo cargar el modelo: ' + err.message + '.';
       estado.classList.add('error');
