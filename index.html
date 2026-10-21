@@ -30,17 +30,20 @@ header { display: grid; gap: 4px; }
 h1 { font-family: var(--titulo); font-weight: 400; font-size: clamp(36px, 5.2vw, 60px); line-height: 1.05; margin: 0; text-wrap: balance; }
 h1 em { font-style: normal; color: var(--acento); }
 [hidden] { display: none !important; }
-.cuerpo { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 28px; align-items: start; }
-/* en dos columnas, el resultado arranca y termina a la altura del recuadro de texto */
-@media (min-width: 861px) { .resultado { margin-top: calc(1.5em + 10px); min-height: max(390px, 46vh); align-content: start; } }
-@media (max-width: 860px) { .cuerpo { grid-template-columns: minmax(0, 1fr); } }
+/* recuadro de texto y resultado en la misma fila: siempre del mismo alto, crecen juntos */
+.cuerpo { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); column-gap: 28px; row-gap: 10px;
+  grid-template-areas: "rotulo ." "texto resultado" "acciones ."; }
+.entrada { display: contents; }
+.rotulo { grid-area: rotulo; }
+textarea { grid-area: texto; }
+.resultado { grid-area: resultado; align-content: start; }
+.acciones { grid-area: acciones; }
 
 /* entrada */
-.entrada { display: grid; gap: 10px; min-width: 0; }
 .rotulo { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .rotulo label { font-weight: 700; }
 .contador { color: var(--gris); font-size: 14px; font-variant-numeric: tabular-nums; }
-textarea { width: 100%; min-height: 390px; height: 46vh; resize: vertical; padding: 16px 18px; font: inherit; font-size: 16px; line-height: 1.55;
+textarea { width: 100%; min-height: max(390px, 46vh); height: auto; align-self: stretch; resize: none; padding: 16px 18px; font: inherit; font-size: 16px; line-height: 1.55;
   color: var(--tinta); background: var(--papel); border: 1.5px solid var(--barra); border-radius: 10px; }
 textarea:focus { outline: none; border-color: var(--acento); box-shadow: 0 0 0 3px rgba(196, 87, 46, .18); }
 textarea::placeholder { color: var(--gris); }
@@ -82,6 +85,21 @@ button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
 .huellas li { background: var(--fondo); border-radius: 999px; padding: 3px 11px; font-size: 13.5px; }
 .huellas li b { font-variant-numeric: tabular-nums; }
 .marco.suave { transition: padding-top .45s cubic-bezier(.2, .8, .2, 1); }
+/* pantallas bajas (notebook 1366×768, proyector): más compacto, para que el resultado y los botones entren sin scroll */
+@media (min-width: 861px) and (max-height: 820px) {
+  .marco { gap: 14px; }
+  h1 { font-size: clamp(36px, 4.4vw, 50px); }
+  .resultado { padding: 18px 24px; gap: 14px; }
+  .veredicto .quien { font-size: clamp(40px, 4.6vw, 56px); }
+  .barras { gap: 8px; }
+  .detalle { padding-top: 12px; gap: 8px; }
+}
+/* celular: texto, botones y abajo el resultado */
+@media (max-width: 860px) {
+  .cuerpo { grid-template-columns: minmax(0, 1fr); grid-template-areas: "rotulo" "texto" "acciones" "resultado"; }
+  textarea { min-height: max(220px, 36vh); }
+  .resultado { margin-top: 14px; padding: 20px; }
+}
 @media (prefers-reduced-motion: reduce) { .pista span, .apilada span, .marco.suave { transition: none; } }
 </style>
 
