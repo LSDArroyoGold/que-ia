@@ -70,10 +70,11 @@ button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
 .veredicto .logo { grid-column: 2; grid-row: 2; align-self: center; width: clamp(44px, 5vw, 64px); height: auto; fill: currentColor; }
 .veredicto .chico { color: var(--gris); font-size: 15px; }
 /* ⚠ ¿dio mal? arriba a la derecha, sin empujar el nombre */
-.reportar { grid-column: 2; grid-row: 1; justify-self: end; margin: -8px -8px -8px 0; padding: 6px; background: none; border: 0; color: var(--gris); line-height: 0; }
+.linea { grid-column: 1 / -1; }
+.reportar { display: inline-block; vertical-align: middle; margin: -6px 0 -6px 4px; padding: 6px; background: none; border: 0; color: var(--gris); line-height: 0; }
 .reportar:hover:not(:disabled) { color: var(--acento); }
 .reportar:disabled { opacity: .35; cursor: default; }
-.reportar svg { width: 24px; height: 24px; }
+.reportar svg { width: 20px; height: 20px; }
 dialog { width: min(440px, calc(100vw - 32px)); border: 0; border-radius: 14px; padding: 24px 26px; background: var(--papel); color: var(--tinta); }
 dialog::backdrop { background: rgba(30, 27, 24, .45); }
 dialog form { display: grid; gap: 14px; }
@@ -84,8 +85,6 @@ dialog p { margin: 0; }
 .opciones input { position: absolute; opacity: 0; pointer-events: none; }
 .opciones label:has(:checked) { background: var(--tinta); border-color: var(--tinta); color: var(--papel); }
 .opciones label:has(:focus-visible) { outline: 3px solid var(--tinta); outline-offset: 2px; }
-#r-comentario { font: inherit; padding: 9px 12px; border: 1.5px solid var(--barra); border-radius: 8px; background: #fff; color: var(--tinta); }
-#r-comentario:focus { outline: none; border-color: var(--acento); }
 .aviso { font-size: 13px; color: var(--gris); }
 .r-acciones { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .veredicto .quien { font-family: var(--titulo); font-size: clamp(44px, 6vw, 72px); line-height: 1; color: var(--gris); }
@@ -157,10 +156,10 @@ dialog p { margin: 0; }
     <section class="resultado" aria-live="polite" aria-label="Resultado">
       <div class="veredicto">
         <span class="chico" id="v-chico">Todavía no hay texto</span>
-        <button class="reportar" id="reportar" type="button" title="¿Dio mal? Avisanos" aria-label="Avisar que el resultado es incorrecto" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></button>
         <span class="quien" id="v-quien">¿…?</span>
         <svg class="logo" id="v-logo" viewBox="0 0 24 24" aria-hidden="true" hidden><path /></svg>
-        <span class="conf" id="v-conf">&nbsp;</span>
+        <div class="linea"><span class="conf" id="v-conf">&nbsp;</span>
+          <button class="reportar" id="reportar" type="button" title="¿Dio mal? Avisanos" aria-label="Avisar que el resultado es incorrecto" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></button></div>
       </div>
       <div class="barras" id="barras"></div>
       <p class="nota" id="nota" hidden></p>
@@ -181,7 +180,6 @@ dialog p { margin: 0; }
     <h2 id="r-titulo">¿Dio el resultado incorrecto?</h2>
     <p id="r-pregunta">¿Qué IA era entonces?</p>
     <div class="opciones" id="r-opciones" role="radiogroup" aria-labelledby="r-pregunta"></div>
-    <input id="r-comentario" type="text" maxlength="1000" placeholder="Comentario (opcional)" aria-label="Comentario (opcional)">
     <p class="aviso">Se guarda el texto que pegaste junto con tu respuesta, para revisar los errores y mejorar el modelo.</p>
     <div class="r-acciones">
       <button class="detectar" type="submit" id="r-enviar">Enviar</button>
@@ -467,7 +465,7 @@ dialog p { margin: 0; }
       l.append(i, n === 'Otra' ? 'Otra o una persona' : n);
       $('r-opciones').append(l);
     });
-    $('r-comentario').value = ''; $('r-estado').textContent = ''; $('r-estado').classList.remove('error');
+    $('r-estado').textContent = ''; $('r-estado').classList.remove('error');
     $('r-enviar').disabled = false;
     $('reporte').showModal();
   });
@@ -481,8 +479,7 @@ dialog p { margin: 0; }
     try {
       // no-cors + text/plain: sin preflight; la respuesta no se lee, solo falla si no hay red
       await fetch(URL_REPORTES, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ real, dijo: u.dijo.nombre, p_claude: q('anthropic'), p_gemini: q('google'), p_chatgpt: q('openai'),
-                               comentario: $('r-comentario').value.trim(), texto: u.texto }) });
+        body: JSON.stringify({ real, dijo: u.dijo.nombre, p_claude: q('anthropic'), p_gemini: q('google'), p_chatgpt: q('openai'), texto: u.texto }) });
       $('r-estado').textContent = '¡Gracias! Quedó guardado.';
       $('reportar').disabled = true; $('reportar').title = 'Ya lo reportaste';
       setTimeout(() => $('reporte').close(), 1200);
