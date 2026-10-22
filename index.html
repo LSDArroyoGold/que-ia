@@ -64,17 +64,17 @@ button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
 .estado { font-size: 14px; color: var(--gris); min-height: 1.5em; }
 .estado:empty { display: none; }
 .estado.error { color: #9C2A10; font-weight: 700; }
-.veredicto { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 16px; row-gap: 2px; }
+.veredicto { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; column-gap: 10px; row-gap: 2px; }
 .veredicto > span { grid-column: 1; }
+.veredicto .conf { grid-column: 1 / -1; }
 /* logo del ganador a la derecha, a la altura del nombre (logos: Simple Icons, CC0) */
-.veredicto .logo { grid-column: 2; grid-row: 2; align-self: center; width: clamp(44px, 5vw, 64px); height: auto; fill: currentColor; }
+.veredicto .logo { grid-column: 3; grid-row: 2; align-self: center; width: clamp(44px, 5vw, 64px); height: auto; fill: currentColor; }
 .veredicto .chico { color: var(--gris); font-size: 15px; }
 /* ⚠ ¿dio mal? arriba a la derecha, sin empujar el nombre */
-.linea { grid-column: 1 / -1; }
-.reportar { display: inline-block; vertical-align: middle; margin: -6px 0 -6px 4px; padding: 6px; background: none; border: 0; color: var(--gris); line-height: 0; }
+.reportar { grid-column: 2; grid-row: 2; align-self: center; padding: 6px; background: none; border: 0; color: var(--gris); line-height: 0; }
 .reportar:hover:not(:disabled) { color: var(--acento); }
 .reportar:disabled { opacity: .35; cursor: default; }
-.reportar svg { width: 20px; height: 20px; }
+.reportar svg { width: 18px; height: 18px; }
 dialog { width: min(440px, calc(100vw - 32px)); border: 0; border-radius: 14px; padding: 24px 26px; background: var(--papel); color: var(--tinta); }
 dialog::backdrop { background: rgba(30, 27, 24, .45); }
 dialog form { display: grid; gap: 14px; }
@@ -157,9 +157,9 @@ dialog p { margin: 0; }
       <div class="veredicto">
         <span class="chico" id="v-chico">Todavía no hay texto</span>
         <span class="quien" id="v-quien">¿…?</span>
+        <button class="reportar" id="reportar" type="button" title="¿Dio mal? Avisanos" aria-label="Avisar que el resultado es incorrecto" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg></button>
         <svg class="logo" id="v-logo" viewBox="0 0 24 24" aria-hidden="true" hidden><path /></svg>
-        <div class="linea"><span class="conf" id="v-conf">&nbsp;</span>
-          <button class="reportar" id="reportar" type="button" title="¿Dio mal? Avisanos" aria-label="Avisar que el resultado es incorrecto" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></button></div>
+        <span class="conf" id="v-conf">&nbsp;</span>
       </div>
       <div class="barras" id="barras"></div>
       <p class="nota" id="nota" hidden></p>
