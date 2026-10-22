@@ -69,6 +69,25 @@ button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
 /* logo del ganador a la derecha, a la altura del nombre (logos: Simple Icons, CC0) */
 .veredicto .logo { grid-column: 2; grid-row: 2; align-self: center; width: clamp(44px, 5vw, 64px); height: auto; fill: currentColor; }
 .veredicto .chico { color: var(--gris); font-size: 15px; }
+/* ⚠ ¿dio mal? arriba a la derecha, sin empujar el nombre */
+.reportar { grid-column: 2; grid-row: 1; justify-self: end; margin: -8px -8px -8px 0; padding: 6px; background: none; border: 0; color: var(--gris); line-height: 0; }
+.reportar:hover:not(:disabled) { color: var(--acento); }
+.reportar:disabled { opacity: .35; cursor: default; }
+.reportar svg { width: 24px; height: 24px; }
+dialog { width: min(440px, calc(100vw - 32px)); border: 0; border-radius: 14px; padding: 24px 26px; background: var(--papel); color: var(--tinta); }
+dialog::backdrop { background: rgba(30, 27, 24, .45); }
+dialog form { display: grid; gap: 14px; }
+dialog h2 { font-family: var(--titulo); font-weight: 400; font-size: 28px; line-height: 1.1; margin: 0; }
+dialog p { margin: 0; }
+.opciones { display: flex; flex-wrap: wrap; gap: 8px; }
+.opciones label { border: 1.5px solid var(--barra); border-radius: 999px; padding: 7px 14px; cursor: pointer; }
+.opciones input { position: absolute; opacity: 0; pointer-events: none; }
+.opciones label:has(:checked) { background: var(--tinta); border-color: var(--tinta); color: var(--papel); }
+.opciones label:has(:focus-visible) { outline: 3px solid var(--tinta); outline-offset: 2px; }
+#r-comentario { font: inherit; padding: 9px 12px; border: 1.5px solid var(--barra); border-radius: 8px; background: #fff; color: var(--tinta); }
+#r-comentario:focus { outline: none; border-color: var(--acento); }
+.aviso { font-size: 13px; color: var(--gris); }
+.r-acciones { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .veredicto .quien { font-family: var(--titulo); font-size: clamp(44px, 6vw, 72px); line-height: 1; color: var(--gris); }
 .veredicto .conf { font-size: 18px; }
 .barras { display: grid; gap: 12px; }
@@ -138,6 +157,7 @@ button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
     <section class="resultado" aria-live="polite" aria-label="Resultado">
       <div class="veredicto">
         <span class="chico" id="v-chico">Todavía no hay texto</span>
+        <button class="reportar" id="reportar" type="button" title="¿Dio mal? Avisanos" aria-label="Avisar que el resultado es incorrecto" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></button>
         <span class="quien" id="v-quien">¿…?</span>
         <svg class="logo" id="v-logo" viewBox="0 0 24 24" aria-hidden="true" hidden><path /></svg>
         <span class="conf" id="v-conf">&nbsp;</span>
@@ -155,6 +175,21 @@ button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
   </div>
 
 </div>
+
+<dialog id="reporte" aria-labelledby="r-titulo">
+  <form id="r-form">
+    <h2 id="r-titulo">¿Dio el resultado incorrecto?</h2>
+    <p id="r-pregunta">¿Qué IA era entonces?</p>
+    <div class="opciones" id="r-opciones" role="radiogroup" aria-labelledby="r-pregunta"></div>
+    <input id="r-comentario" type="text" maxlength="1000" placeholder="Comentario (opcional)" aria-label="Comentario (opcional)">
+    <p class="aviso">Se guarda el texto que pegaste junto con tu respuesta, para revisar los errores y mejorar el modelo.</p>
+    <div class="r-acciones">
+      <button class="detectar" type="submit" id="r-enviar">Enviar</button>
+      <button class="secundario" type="button" id="r-cancelar">Cancelar</button>
+    </div>
+    <p class="estado" id="r-estado" role="status"></p>
+  </form>
+</dialog>
 
 <script>// Port a JavaScript del detector v2 (final.py + rasgos.py): mismo resultado que predict_proba en Python.
 // Se usa en la página (index.html) y en node para verificarlo (verificar.js).
@@ -282,6 +317,9 @@ button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
     { clase: 'openai', logo: 'M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z', nombre: 'ChatGPT', de: 'OpenAI', color: 'var(--chatgpt)' },
   ];
   const $ = id => document.getElementById(id);
+  // App web de Apps Script que agrega cada reporte a la planilla del Drive (demo/reportes_apps_script.gs); vacío = sin botón
+  const URL_REPORTES = 'https://script.google.com/macros/s/AKfycbw_PT74c-l4lQryLIu3l94c2n2OUn8JZptEkHzUHGwnPIAU2nU-eqYUB8M0raEkCZoG/exec';
+  let ultimo = null;
   const texto = $('texto'), boton = $('detectar'), estado = $('estado');
   let predecir = null;
 
@@ -312,6 +350,8 @@ button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
     $('v-quien').textContent = '¿…?';
     $('v-quien').style.color = '';
     $('v-logo').toggleAttribute('hidden', true);
+    $('reportar').hidden = true;
+    ultimo = null;
     $('v-conf').innerHTML = '&nbsp;';
     EMPRESAS.forEach(e => {
       const f = $('f-' + e.clase);
@@ -343,6 +383,9 @@ button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
     $('v-logo').firstChild.setAttribute('d', g.logo);
     $('v-logo').style.color = g.color;
     $('v-logo').toggleAttribute('hidden', false);
+    ultimo = { texto: t, dijo: g, proba: r.proba };
+    $('reportar').hidden = !URL_REPORTES;
+    $('reportar').disabled = false; $('reportar').title = '¿Dio mal? Avisanos';
     $('v-conf').textContent = 'con ' + pct(p) + ' de probabilidad';
     EMPRESAS.forEach(e => {
       const f = $('f-' + e.clase), q = r.proba[e.clase];
@@ -414,6 +457,41 @@ button:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
     }
   }
   // centra la página en la pantalla; cuando aparece el detalle, sube suave lo justo para que entre
+  // ⚠ ¿dio mal?: elegir la IA real (sin la que dijo el modelo) y mandarlo a la planilla
+  $('reportar').addEventListener('click', () => {
+    if (!ultimo) return;
+    $('r-opciones').innerHTML = '';
+    EMPRESAS.filter(e => e !== ultimo.dijo).map(e => e.nombre).concat('Otra').forEach(n => {
+      const l = document.createElement('label'), i = document.createElement('input');
+      i.type = 'radio'; i.name = 'real'; i.value = n; i.required = true;
+      l.append(i, n === 'Otra' ? 'Otra o una persona' : n);
+      $('r-opciones').append(l);
+    });
+    $('r-comentario').value = ''; $('r-estado').textContent = ''; $('r-estado').classList.remove('error');
+    $('r-enviar').disabled = false;
+    $('reporte').showModal();
+  });
+  $('r-cancelar').addEventListener('click', () => $('reporte').close());
+  $('r-form').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const real = $('r-form').elements.real.value, u = ultimo;
+    if (!real || !u) return;
+    $('r-enviar').disabled = true; $('r-estado').classList.remove('error'); $('r-estado').textContent = 'Enviando…';
+    const q = c => Math.round(u.proba[c] * 1e4) / 1e4;
+    try {
+      // no-cors + text/plain: sin preflight; la respuesta no se lee, solo falla si no hay red
+      await fetch(URL_REPORTES, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ real, dijo: u.dijo.nombre, p_claude: q('anthropic'), p_gemini: q('google'), p_chatgpt: q('openai'),
+                               comentario: $('r-comentario').value.trim(), texto: u.texto }) });
+      $('r-estado').textContent = '¡Gracias! Quedó guardado.';
+      $('reportar').disabled = true; $('reportar').title = 'Ya lo reportaste';
+      setTimeout(() => $('reporte').close(), 1200);
+    } catch (err) {
+      $('r-estado').textContent = 'No se pudo enviar. ¿Hay internet? Probá de nuevo.'; $('r-estado').classList.add('error');
+      $('r-enviar').disabled = false;
+    }
+  });
+
   function encuadrar() {
     const m = document.querySelector('.marco');
     const alto = m.offsetHeight - parseFloat(getComputedStyle(m).paddingTop) + 28;
